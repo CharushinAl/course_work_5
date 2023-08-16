@@ -3,24 +3,15 @@ import psycopg2
 
 class DBCreate:
 
-    def __init__(self, database: str, user: str, password: str) -> None:
-        self.database = database
-        self.user = user
-        self.password = password
+    def __init__(self, params: dict):
+        """Инициализация соединения и курсора по параметрам из config."""
 
-        self.conn = psycopg2.connect(host='localhost', database=self.database, user=self.user, password=self.password)
+        self.conn = psycopg2.connect(**params)
         self.conn.autocommit = True
         self.cur = self.conn.cursor()
 
-    def create_database(self) -> None:
-        """Создает базу данных и таблицы работодатели и вакансии."""
-
-        #try:
-        #    self.cur.execute(f"DROP DATABASE IF EXISTS {self.database}")
-        #    self.cur.execute(f"CREATE DATABASE {self.database}")
-        #    print(f"Database {self.database} created successfully.")
-        #except Exception as e:
-        #    print(f"Error: {e}")
+    def create_tables(self) -> None:
+        """Создает таблицы работодатели и вакансии."""
 
         self.cur.execute("""
                         CREATE TABLE employers 
@@ -54,9 +45,6 @@ class DBCreate:
                             REFERENCES employers(employer_id)
                         )
                    """)
-
-        # self.cur.close()
-        # self.conn.close()
 
 
 class DBManager(DBCreate):
@@ -113,9 +101,7 @@ class DBManager(DBCreate):
         в названии которых содержатся переданные в метод слова, например “python”.
         """
         self.cur.execute(f"""
-                            SELECT * FROM vacancies WHERE vacancy_name LIKE %s",
-                            ('%' + {key_word} + '%')
-
+                            SELECT * FROM vacancies WHERE vacancy_name ILIKE '%{key_word}%'
                         """)
         rows = self.cur.fetchall()
         return rows

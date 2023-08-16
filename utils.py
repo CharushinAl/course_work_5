@@ -3,7 +3,7 @@ import psycopg2
 
 def transformation_list_employers(employers: list) -> list:
     """
-    Сохранение в кортеж информации необходимой для заполнения таблицы.
+    Сохранение в кортеж информации необходимой для заполнения таблицы
     :param employers: list работодателей
     :return: tuple с обработанными данными работодателей
     """
@@ -12,7 +12,7 @@ def transformation_list_employers(employers: list) -> list:
 
 def transformation_list_vacancies(vacancies: list) -> list:
     """
-        Сохранение в кортеж информации необходимой для заполнения таблицы.
+        Сохранение в кортеж информации необходимой для заполнения таблицы
         :param vacancies: list вакансий
         :return: tuple с обработанными данными вакансий
         """
@@ -33,17 +33,15 @@ def transformation_list_vacancies(vacancies: list) -> list:
     return data
 
 
-def append_data_db(database: str, user: str, password: str, employers: list, vacancies: list) -> None:
+def append_data_db(params: dict, employers: list, vacancies: list) -> None:
     """
        Запись данных в БД
-       :param database: str имя базы данных
-       :param user: str логин пользователя базы данных
-       :param password: str пароль пользователя базы данных
+       :param params: dict с параметрами подключения
        :param employers: list of tuples
        :param vacancies: list of tuples
        :return: None
        """
-    with psycopg2.connect(host='localhost', database=database, user=user, password=password) as conn:
+    with psycopg2.connect(**params) as conn:
         with conn.cursor() as cur:
             for emp in employers:
                 cur.execute("INSERT INTO employers VALUES (%s, %s, %s, %s)", emp)

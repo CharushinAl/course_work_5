@@ -1,4 +1,4 @@
-CREATE DATABASE parse_hh
+CREATE DATABASE hh_db
     WITH
     OWNER = postgres
     ENCODING = 'UTF8'

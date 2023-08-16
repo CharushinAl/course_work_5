@@ -28,9 +28,6 @@ class Employers:
         data = []
         for i in self.employers_id:
             response = requests.get('https://api.hh.ru/vacancies', params={'employer_id': i, 'per_page': 100})
-            # job_hh = response.content.decode()
-            # job_json = json.loads(job_hh)
-            # info.append(job_json)
             row_data = response.json()['items']  # json method requests
             data.extend(row_data)
         return data

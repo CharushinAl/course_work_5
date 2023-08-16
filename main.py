@@ -1,33 +1,40 @@
 from utils import transformation_list_employers, transformation_list_vacancies, append_data_db
 from employers import Employers
 from db_manager import DBManager
+from config import read_config
+
 import psycopg2
 
 
 def main():
+    # получение параметров соединения
+    params = read_config()
+    # создание экземпляра класса работающего с АПИ ХХ
     emp = Employers()
+    # получение информации из АПИ и ее преобразование в утилитах
     employers = transformation_list_employers(emp.get_info_employers())
     vacancies = transformation_list_vacancies(emp.get_info_vacancies())
 
-    user = input('Привет! Напиши данные для входа в базу данных \nИмя пользователя: ')
-    password = input('Пароль: ')
-    database = input('Название базы данных: ')
     try:
-
-        db_manager = DBManager(database, user, password)
-        db_manager.create_database()
-        append_data_db(database, user, password, employers, vacancies)
+        # создание экземпляра класса работающего с бд
+        db_manager = DBManager(params)
+        # создание таблиц
+        db_manager.create_tables()
+        # заполнение таблиц обработанными данными
+        append_data_db(params, employers, vacancies)
     except psycopg2.OperationalError as e:
         exit(f'{e}Неверные данные!')
 
     while True:
-        user_input = input('Напиши номер данных, которые необходимо вывести?\n\
-Все компании и количество вакансий - 1\n\
-Все вакансии с указанием названия компании, названия вакансии и зарплаты и ссылки на вакансию - 2\n\
-Среднюю зарплату по вакансиям - 3\n\
-Все вакансии, у которых зарплата выше средней по всем вакансиям - 4\n\
-Найти вакансии с определенным именем - 5\n\
-Закончить работу - Стоп\n')
+
+        print('\nВедите цифру для получения необходимых данных')
+        print('Все компании и количество вакансий - 1')
+        print('Все вакансии с указанием названия компании, вакансии, зарплаты и ссылки - 2')
+        print('Среднюю зарплату по вакансиям - 3')
+        print('Все вакансии, у которых зарплата выше средней по всем вакансиям - 4')
+        print('Найти вакансии с определенным именем - 5')
+        print('Закончить работу - Стоп(stop)')
+        user_input = input()
 
         if user_input == '1':
             for row in db_manager.get_companies_and_vacancies_count():
@@ -48,7 +55,8 @@ def main():
         elif user_input.lower() == 'стоп' or 'stop':
             break
         else:
-            print('Неверные данные!')
+            print('Некорректный ввод!')
+            continue
 
     db_manager.cur.close()
     db_manager.conn.close()
